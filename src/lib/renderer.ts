@@ -40,6 +40,16 @@ function photo(ctx: CanvasRenderingContext2D, image: ImageSource, s: Settings, w
   ctx.restore();
 }
 
+/** Draw an unanimated, unfiltered version of the uploaded image for before/after comparison. */
+export function renderOriginalFrame(ctx: CanvasRenderingContext2D, image: ImageSource, settings: Settings) {
+  const { width, height } = ctx.canvas;
+  ctx.save();
+  ctx.fillStyle = settings.background;
+  ctx.fillRect(0, 0, width, height);
+  photo(ctx, image, { ...settings, brightness: 100, contrast: 100, saturation: 100, blur: 0 }, width, height);
+  ctx.restore();
+}
+
 /** Deterministic renderer shared by both preview and export. Time is normalized [0, 1). */
 export function renderFrame(ctx: CanvasRenderingContext2D, image: ImageSource, s: Settings, progress: number) {
   const { width: w, height: h } = ctx.canvas;

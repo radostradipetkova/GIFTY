@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowDownToLine, ArrowLeftRight, Check, ChevronDown, CircleHelp, Clock3, ImagePlus, Layers2, Maximize2, MoreHorizontal, Pause, Play, RotateCcw, Shuffle, SlidersHorizontal, Sparkles, Square, UploadCloud, WandSparkles, X } from 'lucide-react';
 import { defaults, effects, applyEffectPreset, getCanvasSize, getExportDuration, sanitizeSettings, type EffectId, type Settings } from '../lib/presets';
-import { renderFrame } from '../lib/renderer';
+import { renderFrame, renderOriginalFrame } from '../lib/renderer';
 import { downloadBlob, exportImageGif, exportVideo, loadDemoImage, loadImageFromFile, supportedVideoFormats } from '../lib/exporters';
 
 const DEMOS = [
@@ -23,7 +23,7 @@ export default function Studio({ active, initialEffect }: {active:boolean;initia
   const [image, setImage] = useState<HTMLImageElement | null>(null);
   const [imageName, setImageName] = useState('');
   const [drag, setDrag] = useState(false);
-  const [playing, setPlaying] = useState(true);
+  const [playing, setPlaying] = useState(() => !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [playhead, setPlayhead] = useState(0);
   const [before, setBefore] = useState(false);
   const [exportKind, setExportKind] = useState('gif');
@@ -62,7 +62,8 @@ export default function Studio({ active, initialEffect }: {active:boolean;initia
         playheadRef.current = settings.loopMode === 'once' ? Math.min(.9999, elapsed) : ((elapsed % 1) + 1) % 1;
         if (settings.loopMode === 'once' && elapsed >= 1) setPlaying(false);
       }
-      renderFrame(ctx, image, before ? { ...settings, intensity: 0 } : settings, playheadRef.current);
+      if (before) renderOriginalFrame(ctx, image, settings);
+      else renderFrame(ctx, image, settings, playheadRef.current);
       if (now - lastUpdate > 95) { setPlayhead(playheadRef.current); lastUpdate = now; }
       if (playing && active) animation = requestAnimationFrame(draw);
     };
@@ -105,7 +106,7 @@ export default function Studio({ active, initialEffect }: {active:boolean;initia
   const changePlayhead = (value:number) => {
     setPlaying(false); playheadRef.current=value;setPlayhead(value);
     const ctx=canvasRef.current?.getContext('2d');
-    if(ctx&&image) renderFrame(ctx,image,before?{...settings,intensity:0}:settings,value);
+    if(ctx&&image){if(before)renderOriginalFrame(ctx,image,settings);else renderFrame(ctx,image,settings,value);}
   };
   useEffect(()=>{const handler=(e:KeyboardEvent)=>{
     if(!active || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement || e.metaKey || e.ctrlKey)return;
