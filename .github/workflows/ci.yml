@@ -12,7 +12,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
       - run: npm install --no-audit --no-fund
       - run: npm run check
       - run: npm test
@@ -28,7 +27,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
       - run: npm install --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: gifty-browser-diagnostics
+          path: test-results
+          if-no-files-found: ignore

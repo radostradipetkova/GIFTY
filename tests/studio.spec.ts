@@ -13,10 +13,24 @@ test('GIFTY generates a genuine browser-encoded GIF after changing the animation
   await page.getByRole('spinbutton',{name:'Height'}).fill('240');
   await page.getByRole('combobox',{name:'Duration'}).selectOption('1');
   await page.getByRole('combobox',{name:'Frame rate'}).selectOption('10');
-  const [download]=await Promise.all([
-    page.waitForEvent('download',{timeout:110_000}),
-    page.getByRole('button',{name:/Download GIF/}).click(),
-  ]);
+  const browserErrors: string[] = [];
+  page.on('pageerror', e => browserErrors.push(e.message));
+  page.on('console', m => { if (m.type()==='error') browserErrors.push(m.text()); });
+  let download;
+  try {
+    [download]=await Promise.all([
+      page.waitForEvent('download',{timeout:50_000}),
+      page.getByRole('button',{name:/Download GIF/}).click(),
+    ]);
+  } catch {
+    const state=await page.evaluate(()=>({
+      alert: document.querySelector('[role=alert]')?.textContent,
+      status: document.querySelector('[role=status]')?.textContent,
+      progress: document.querySelector('[role=progressbar]')?.getAttribute('aria-valuenow'),
+      button: document.querySelector('.export-btn')?.textContent,
+    }));
+    throw new Error(`GIF download missing. UI state: ${JSON.stringify(state)}; console: ${browserErrors.join(' | ')}`);
+  }
   expect(download.suggestedFilename()).toMatch(/\.gif$/);
   const bytes=fs.readFileSync(await download.path());
   const reader=new GifReader(bytes);
