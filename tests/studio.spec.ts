@@ -49,3 +49,32 @@ test('homepage navigation and AI limitations are communicated',async({page})=>{
   await expect(page.getByText(/No GPU backend connected/)).toBeVisible();
   await expect(page.getByText(/Import a video/)).toBeVisible();
 });
+
+test('uploaded PNG can be previewed and exported as a playable browser video', async ({page}) => {
+  await page.goto('/studio');
+  const imageBase64 = await page.evaluate(() => {
+    const canvas=document.createElement('canvas'); canvas.width=320; canvas.height=240;
+    const context=canvas.getContext('2d')!;
+    context.fillStyle='#da385c';context.fillRect(0,0,320,240);
+    context.fillStyle='#caef80';context.fillRect(40,40,180,120);
+    return canvas.toDataURL('image/png').split(',')[1];
+  });
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'uploaded-test.png', mimeType: 'image/png', buffer: Buffer.from(imageBase64,'base64')
+  });
+  await expect(page.getByText('uploaded-test.png')).toBeVisible();
+  await page.getByRole('combobox',{name:'Duration'}).selectOption('1');
+  await page.getByRole('combobox',{name:'Frame rate'}).selectOption('10');
+  const webm = page.locator('.export-formats button').filter({hasText:/WebM|VP9|VP8/}).first();
+  test.skip(await webm.count()===0, 'WebM MediaRecorder is unsupported in this browser');
+  await webm.click();
+  const [download]=await Promise.all([
+    page.waitForEvent('download',{timeout:30_000}),
+    page.locator('.export-btn').click()
+  ]);
+  expect(download.suggestedFilename()).toMatch(/\.webm$/);
+  const bytes=fs.readFileSync(await download.path());
+  expect(bytes.length).toBeGreaterThan(1000);
+  // EBML magic marks a WebM/Matroska container; confirms this is not a renamed image.
+  expect(bytes.subarray(0,4).toString('hex')).toBe('1a45dfa3');
+});
