@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+.env
+.env.*
+!.env.example
+*.local
+*.tsbuildinfo
+__pycache__/
+*.pyc
+.venv/
+backend/jobs/
+backend/uploads/
+.DS_Store
+backend/workflow_api.json
