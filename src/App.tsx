@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowDownRight, ArrowRight, Check, ChevronRight, CircleHelp, Github, Heart, ImagePlus, Menu, MousePointer2, Play, ShieldCheck, Sparkles, WandSparkles, X } from 'lucide-react';
+import { ArrowDownRight, ArrowRight, Check, ChevronRight, CircleHelp, Github, Heart, Menu, MousePointer2, Play, ShieldCheck, Sparkles, WandSparkles, X } from 'lucide-react';
 import Studio from './components/Studio';
 import AIMotionLab from './components/AIMotionLab';
 import { effects, type EffectId } from './lib/presets';

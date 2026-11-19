@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowDownToLine, ArrowLeftRight, Check, ChevronDown, CircleHelp, Clock3, Download, ImagePlus, Layers2, Maximize2, MoreHorizontal, Pause, Play, RotateCcw, Shuffle, SlidersHorizontal, Sparkles, Square, UploadCloud, WandSparkles, X } from 'lucide-react';
+import { ArrowDownToLine, ArrowLeftRight, Check, ChevronDown, CircleHelp, Clock3, ImagePlus, Layers2, Maximize2, MoreHorizontal, Pause, Play, RotateCcw, Shuffle, SlidersHorizontal, Sparkles, Square, UploadCloud, WandSparkles, X } from 'lucide-react';
 import { defaults, effects, applyEffectPreset, getCanvasSize, getExportDuration, sanitizeSettings, type EffectId, type Settings } from '../lib/presets';
 import { renderFrame } from '../lib/renderer';
 import { downloadBlob, exportImageGif, exportVideo, loadDemoImage, loadImageFromFile, supportedVideoFormats } from '../lib/exporters';
