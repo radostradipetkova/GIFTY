@@ -1,0 +1,27 @@
+name: Record real GIFTY showcase footage
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'showcase/**'
+      - '.github/workflows/showcase.yml'
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: node showcase/capture.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gifty-showcase-footage
+          path: showcase-output/
+          if-no-files-found: warn
+          compression-level: 1
