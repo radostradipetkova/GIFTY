@@ -1,0 +1,25 @@
+name: Capture GIFTY 1080p editorial stills
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'showcase/stills.mjs'
+      - '.github/workflows/stills.yml'
+jobs:
+  stills:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: node showcase/stills.mjs
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gifty-actual-ui-stills
+          path: showcase-stills
+          compression-level: 1
