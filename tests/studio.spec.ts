@@ -41,12 +41,12 @@ test('GIFTY generates a genuine browser-encoded GIF after changing the animation
   expect(Buffer.compare(Buffer.from(a),Buffer.from(b))).not.toBe(0);
 });
 
-test('homepage navigation and AI limitations are communicated',async({page})=>{
+test('homepage navigation and AI configuration are communicated',async({page})=>{
   await page.goto('/');
   await expect(page.getByText(/Your pictures/).first()).toBeVisible();
   await page.getByRole('button',{name:/AI Motion Lab/}).click();
   await expect(page.getByRole('heading',{name:/AI Motion lab/i})).toBeVisible();
-  await expect(page.getByText(/No GPU backend connected/)).toBeVisible();
+  await expect(page.getByText(/AI generation is not enabled yet/)).toBeVisible();
   await expect(page.getByText(/Import a video/)).toBeVisible();
 });
 

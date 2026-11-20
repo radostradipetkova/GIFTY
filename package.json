@@ -31,7 +31,8 @@
     "vitest": "^3.0.0",
     "omggif": "^1.0.10",
     "@playwright/test": "^1.58.0",
-    "@types/omggif": "^1.0.5"
+    "@types/omggif": "^1.0.5",
+    "wrangler": "^4.166.0"
   },
   "engines": {
     "node": ">=20.19.0"

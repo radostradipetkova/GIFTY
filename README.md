@@ -42,27 +42,20 @@ The automated workflow at `.github/workflows/ci.yml` runs type checking, unit te
 
 GIFs are rendered at up to 960px on the long edge (or a maximum of ~1.6 megapixels for video conversion) to limit memory and render time. GIF has a 256-color palette and is typically much larger than a modern video file. Some browsers do not support `MediaRecorder`, WebM or MP4: unavailable formats are not offered. Most browser video capture runs in real time.
 
-Browser-local GIF/video processing keeps the source image on your device. AI generation is different: it sends the selected image and prompt to **the explicitly configured private backend**. A GPU running a model is required; Cloudflare Pages does not provide free GPU inference. Learn more in [`backend/README.md`](backend/README.md).
+Browser-local GIF/video processing keeps the source image on your device. AI generation is different: it sends the selected image and prompt to an external model through an authenticated Cloudflare Worker endpoint. A GPU running a model is required; AI video generation is a paid third-party model accessed through Cloudflare Workers AI. Learn more in [`backend/README.md`](backend/README.md).
 
-## Deploy to Cloudflare Pages (Free)
+## Deploy to Cloudflare Workers (already in use)
 
-1. Push this repository to the `main` branch. Ensure Actions checks pass.
-2. In **Cloudflare → Workers & Pages → Create application → Pages → Connect to Git**, grant Cloudflare access to `radostradipetkova/GIFTY`.
-3. Select **Framework preset: Vite** (or None) and these settings:
-   - **Production branch:** `main`
-   - **Build command:** `npm run build`
-   - **Build output directory:** `dist`
-   - **Root directory:** repository root
-   - **Node version:** 22 (set `NODE_VERSION=22` in build environment if needed)
-4. Deploy. Visit the public `*.pages.dev` URL, navigate to `/studio`, apply an effect and download a real GIF.
-5. Push another small change to `main`; Cloudflare should automatically create a new deployment. Open **Deployments** to confirm it completed successfully. If not, inspect the failed build logs; do not assume the website is live.
+GIFTY is deployed at [gifty.radostradipetkova.workers.dev](https://gifty.radostradipetkova.workers.dev). Its GitHub-connected Cloudflare Worker builds with `npm run build` and deploys with `npx wrangler deploy`; leave the Cloudflare root directory blank. The `wrangler.jsonc` file configures static assets, SPA routing, the AI model binding and a per-client rate limiter. Do **not** add a `public/_redirects` file: it caused Cloudflare error 100324.
 
-Cloudflare Pages serves the static app only. `public/_redirects` rewrites SPA routes to `/index.html`. Never expose private API tokens as `VITE_*` variables or commit `.env` files. You can optionally set `VITE_GIFTY_AI_URL` to an HTTPS backend URL. End users still enter their own access token during the session.
+## Real AI video generation (opt-in)
 
-## Optional AI backend
+The AI Motion Lab uses Cloudflare Workers AI's third-party **Vidu Q3 Turbo** image-to-video model. It can generate short 540p videos from a user image and prompt, and the returned MP4 can be converted to a GIF locally. AI generation runs through a same-origin Worker endpoint: visitors never enter the provider API key or a backend URL.
 
-See [`backend/README.md`](backend/README.md) for Python FastAPI, token-protected ComfyUI API gateway, secure origin restrictions, queue limits and workflow configuration. It is an **integration path**, not pre-provisioned AI inference. The live AI generation feature is unverified until a compatible ComfyUI model and workflow are configured on a working GPU host.
+**AI is disabled by default to prevent unintended bills.** A site owner must activate Cloudflare third-party AI credits/billing and secure the endpoint with Cloudflare Turnstile (or a private owner passcode), then set `GIFTY_AI_ENABLED=true` in the Cloudflare Worker environment. Cloudflare pricing currently lists $0.04 per second at 540p, or about $0.12 for 3 seconds (pricing subject to change). There is no unlimited free AI generation.
+
+See **[full activation guide](docs/cloudflare-ai.md)**. The existing optional `backend/` ComfyUI server remains available for developers, but is not required by the default Cloudflare UI.
 
 ## License
 
-MIT. Original GIFTY brand and demo SVG artwork may be reused under the same license. Dependencies retain their respective licenses: `gifenc` (MIT), React (MIT), Vite (MIT), Motion (MIT), lucide-react (ISC), Tailwind CSS (MIT), and others as specified in their distributions.
+MIT. Original GIFTY brand and demo SVG artwork may be reused under the same license. Dependencies retain their respective licenses, including `gifenc`, React, Vite, Motion, Lucide, Tailwind and Wrangler.

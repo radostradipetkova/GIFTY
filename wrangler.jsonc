@@ -1,8 +1,15 @@
 {
   "name": "gifty",
   "compatibility_date": "2026-11-18",
+  "main": "./src/worker/ai.ts",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
-  }
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "ai": { "binding": "AI" },
+  "ratelimits": [
+    { "name": "AI_RATE", "namespace_id": "451729", "simple": { "limit": 1, "period": 60 } }
+  ]
 }
