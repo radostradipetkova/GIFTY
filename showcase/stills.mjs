@@ -13,7 +13,7 @@ const snap=async(name)=>{await page.screenshot({path:path.join(output,name+'.png
 try{
 await page.goto('http://127.0.0.1:4175/',{waitUntil:'domcontentloaded'});
 await page.locator('.hero h1').waitFor();await snap('00-home');
-await page.locator('.hero-actions .btn-lime').first().click();await page.locator('.effect-card').first().waitFor();await page.waitForTimeout(170);
+await page.locator('.hero-actions .btn-lime').first().click();await page.locator('.effect-card').first().waitFor();await page.locator('.aspect-choice').filter({hasText:'16:9'}).click();await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.waitForTimeout(280);
 await snap('01-studio');
 const names=['Cinematic Zoom','Dream Float','Parallax Tilt','VHS Glitch','Ken Burns','Hypnotic Pulse','Orbital Motion','Reality Split','Dream Blur','Floating Product'];
 for(const [i,name] of names.entries()){
