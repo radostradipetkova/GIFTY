@@ -41,7 +41,7 @@ describe('GIFTY paid video generation gateway',()=>{
     expect(response.status).toBe(200);
     const data=await response.json() as {videoUrl:string};
     expect(data.videoUrl).toMatch(/^\/api\/ai\/video\?e=/);
-    expect(e.AI?.run).toHaveBeenCalledWith('vidu/q3-turbo',expect.objectContaining({duration:3,resolution:'540p',audio:false,prompt:'Make the clouds move softly.',start_image:expect.stringMatching(/^data:image\/jpeg;base64,\/9j/)}));
+    expect(e.AI?.run).toHaveBeenCalledWith('vidu/q3-turbo',expect.objectContaining({duration:3,resolution:'540p',audio:false,prompt:'Make the clouds move softly.',start_image:expect.stringMatching(/^data:image\/jpeg;base64,\/9j/)}), {gateway:{id:'default'}});
     const tampered=new URL(data.videoUrl,'https://gifty.example');tampered.searchParams.set('u','https://evil.example/clip.mp4');
     expect((await routeAI(new Request(tampered),e)).status).toBe(403);
     const getter=vi.spyOn(globalThis,'fetch').mockResolvedValue(new Response(new Uint8Array([0,0,0,1]),{headers:{'Content-Type':'video/mp4'}}));

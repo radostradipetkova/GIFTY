@@ -4,7 +4,7 @@
  */
 export type AIEnv = {
   ASSETS?: { fetch(request: Request): Promise<Response> };
-  AI?: { run(model: string, input: Record<string, unknown>): Promise<unknown> };
+  AI?: { run(model: string, input: Record<string, unknown>, options?: { gateway: { id: string } }): Promise<unknown> };
   AI_RATE?: { limit(input: { key: string }): Promise<{ success: boolean }> };
   GIFTY_AI_ENABLED?: string;
   GIFTY_TURNSTILE_SITE_KEY?: string;
@@ -81,7 +81,7 @@ async function generate(request: Request, env: AIEnv) {
   const encoded = base64url(bytes);
   const start_image = 'data:image/jpeg;base64,' + encoded.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(encoded.length / 4) * 4, '=');
   try {
-    const response = await env.AI!.run(MODEL, { prompt: prompt.trim(), start_image, duration, resolution: '540p', audio: false }) as {
+    const response = await env.AI!.run(MODEL, { prompt: prompt.trim(), start_image, duration, resolution: '540p', audio: false }, { gateway: { id: 'default' } }) as {
       result?: { video?: unknown }; state?: string; video?: unknown;
     };
     if (response.state && response.state.toLowerCase() !== 'completed') return json({ error: 'The provider did not finish the video: ' + response.state }, 502);

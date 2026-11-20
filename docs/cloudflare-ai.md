@@ -6,7 +6,7 @@ GIFTY now supports actual image-to-video generation using `vidu/q3-turbo` throug
 
 ## 1. Check Cloudflare AI billing before enabling
 
-- In the Cloudflare dashboard, open **AI → AI Gateway / AI Models**, configure **Unified Billing/credits** for third-party models and check the available account balance/access. The model runs on paid compute, not the free Worker hosting plan.
+- In the Cloudflare dashboard, open **AI → AI Gateway**, add credits under **Manage credits**, then configure the **default** gateway for **Unified billing** (including its **Workers AI Billing** setting). GIFTY explicitly routes model requests to `gateway: { id: 'default' }` through the existing AI binding, so no browser-facing API token or separate custom gateway is needed. The model runs on paid compute, not the free Worker hosting plan.
 - Consult the latest Cloudflare model pricing before enabling: https://developers.cloudflare.com/ai/models/vidu/q3-turbo/ . At the documented 540p price of USD $0.04 per video-second, a 3-second video costs about $0.12 and a 5-second video about $0.20, subject to pricing changes, taxes, and provider billing policy.
 - **Set an account-wide spending cap / AI Gateway budget** before enabling this on a public website, and monitor usage. A per-IP rate limiter is not a hard worldwide cost cap.
 
@@ -35,7 +35,7 @@ To test without a public Turnstile widget, create `GIFTY_OWNER_PASSCODE` as an e
 - `wrangler.jsonc` provides the `AI` binding, `AI_RATE` per-IP limiter, and `/api/*` Worker routing alongside the original Vite static assets.
 - `GET /api/ai/config` provides only safe public status and model information.
 - `POST /api/ai/generate` requires the origin to match, an image compressed in-browser to a max 960px JPEG (<2MB), a bounded prompt, a verified Turnstile token or private owner passcode, and a successful per-IP rate check (one attempt per minute per Cloudflare region).
-- Server-side `env.AI.run('vidu/q3-turbo', { prompt, start_image, duration, resolution:'540p', audio:false })` calls actual generative video inference. The uploaded image goes to the chosen third-party model; the client does not expose or store provider credentials.
+- Server-side `env.AI.run('vidu/q3-turbo', { prompt, start_image, duration, resolution:'540p', audio:false }, { gateway: { id: 'default' } })` calls actual generative video inference with the account's AI Gateway unified billing. The uploaded image goes to the chosen third-party model; the client does not expose or store provider credentials.
 - The signed, expiring `/api/ai/video` route proxies the returned MP4 from the known provider video domain so GIFTY can preview it and convert to a GIF in the browser. Video links expire after two hours. No upload is stored by GIFTY.
 - No fake processing percentages are used. The UI can stop waiting; canceling the HTTP request **does not necessarily cancel provider billing**.
 
